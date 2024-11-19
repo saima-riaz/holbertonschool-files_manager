@@ -1,4 +1,5 @@
-import dbClient from './utils/db';
+import dbClient from './utils/db.mjs';
+
 
 const waitConnection = () => {
     return new Promise((resolve, reject) => {

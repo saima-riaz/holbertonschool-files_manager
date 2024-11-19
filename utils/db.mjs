@@ -46,4 +46,4 @@ class DBClient {
   }
 }
 
-module.exports = new DBClient();
+export default new DBClient();
