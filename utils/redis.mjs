@@ -1,56 +1,58 @@
-import { createClient } from 'redis';
+import redis from 'redis';
 
 class RedisClient {
-  constructor() {
-    this.client = createClient(); // Create Redis client instance
+    constructor() {
+        this.client = redis.createClient(); // Initialize Redis client
 
-    // Handling connection and errors
-    this.client.on('error', (error) => {
-      console.error(`Redis client error: ${error}`);
-    });
-
-    // Explicitly connecting to Redis
-    this.client.connect().catch((error) => {
-      console.error(`Failed to connect to Redis: ${error}`);
-    });
-  }
-
-  // Check if Redis client is alive
-  isAlive() {
-    return this.client.isOpen;
-  }
-
-  // Get a value from Redis
-  async get(key) {
-    try {
-      return await this.client.get(key);
-    } catch (error) {
-      console.error(`Error getting key "${key}": ${error}`);
-      throw error; // Re-throw the error for handling at higher levels
+        // Handle Redis client errors
+        this.client.on('error', (err) => {
+            console.error('Redis Client Error:', err);
+        });
     }
-  }
 
-  // Set a value in Redis with an expiration time
-  async set(key, value, duration) {
-    try {
-      return await this.client.setEx(key, duration, value);
-    } catch (error) {
-      console.error(`Error setting key "${key}": ${error}`);
-      throw error; // Re-throw the error for handling at higher levels
+    isAlive() {
+        return this.client.connected; // Return true if Redis client is connected
     }
-  }
 
-  // Delete a key from Redis
-  async del(key) {
-    try {
-      return await this.client.del(key);
-    } catch (error) {
-      console.error(`Error deleting key "${key}": ${error}`);
-      throw error; // Re-throw the error for handling at higher levels
+    async get(key) {
+        return new Promise((resolve, reject) => {
+            this.client.get(key, (err, value) => {
+                if (err) {
+                    console.error(`Failed to get value for key "${key}":`, err);
+                    reject(err);
+                } else {
+                    resolve(value);
+                }
+            });
+        });
     }
-  }
+
+    async set(key, value, duration) {
+        return new Promise((resolve, reject) => {
+            this.client.set(key, value, 'EX', duration, (err) => {
+                if (err) {
+                    console.error(`Failed to set value for key "${key}":`, err);
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+    }
+
+    async del(key) {
+        return new Promise((resolve, reject) => {
+            this.client.del(key, (err) => {
+                if (err) {
+                    console.error(`Failed to delete key "${key}":`, err);
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+    }
 }
 
-// Create and export a single instance of the Redis client
 const redisClient = new RedisClient();
 export default redisClient;

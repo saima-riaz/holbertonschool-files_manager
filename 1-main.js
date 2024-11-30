@@ -20,9 +20,9 @@ const waitConnection = () => {
 };
 
 (async () => {
-    console.log(await dbClient.isAlive()); // Will now return true after the connection is established
+    console.log(await dbClient.isAlive()); // Will now return true or false depending on MongoDB connection status
     await waitConnection();
-    console.log(await dbClient.isAlive()); // This should print true now
+    console.log(await dbClient.isAlive()); // This should print true once the connection is established
     console.log(await dbClient.nbUsers());
     console.log(await dbClient.nbFiles());
 })();
